@@ -172,11 +172,12 @@ func NearestColor(c color.Color) (nc color.Color, name string) {
 }
 
 func colorDissimilarity(c1 color.Color, c2 color.Color) (d uint32) {
-	r1, g1, b1, _ := c1.RGBA()
-	r2, g2, b2, _ := c2.RGBA()
+	r1, g1, b1, a1 := c1.RGBA()
+	r2, g2, b2, a2 := c2.RGBA()
 	d += diff(r1, r2)
 	d += diff(g1, g2)
 	d += diff(b1, b2)
+	d += diff(a1, a2)
 	return d
 }
 
