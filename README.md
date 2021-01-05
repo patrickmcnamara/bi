@@ -26,4 +26,4 @@ The `BIZ` format is the same except it is gzipped and the magic number at the st
 
 ## License
 
-This project is licensed under the GNU Lesser General Public License v3.0.
+This project is licensed under the MIT license.
