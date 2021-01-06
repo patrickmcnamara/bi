@@ -13,6 +13,7 @@ var CSSColModLevel4 color.Model = color.ModelFunc(func(c color.Color) color.Colo
 })
 
 var colors = map[string]color.RGBA{
+	"":                     {}, // transparent
 	"aliceblue":            {240, 248, 255, 255},
 	"antiquewhite":         {250, 235, 215, 255},
 	"aqua":                 {0, 255, 255, 255},
