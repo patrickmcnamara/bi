@@ -3,7 +3,14 @@ package bi
 import (
 	"image/color"
 	"math"
+	"strings"
 )
+
+// CSSColModLevel4 is the Model for CSS Color Module Level 4.
+var CSSColModLevel4 color.Model = color.ModelFunc(func(c color.Color) color.Color {
+	nc, _ := nearestColor(c)
+	return nc
+})
 
 var colors = map[string]color.RGBA{
 	"aliceblue":            {240, 248, 255, 255},
@@ -156,13 +163,11 @@ var colors = map[string]color.RGBA{
 	"yellowgreen":          {154, 205, 50, 255},
 }
 
-// NearestColor returns the nearest Color support by BI. It also returns the
-// name of that color.
-func NearestColor(c color.Color) (nc color.Color, name string) {
+func nearestColor(c color.Color) (nc color.Color, name string) {
 	var mind uint32 = math.MaxUint32
 	for n, cc := range colors {
 		d := colorDissimilarity(c, cc)
-		if d < mind {
+		if d < mind || d == mind && strings.Compare(n, name) < 0 {
 			mind = d
 			nc = cc
 			name = n
