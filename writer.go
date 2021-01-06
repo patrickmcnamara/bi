@@ -21,7 +21,7 @@ func Encode(w io.Writer, m image.Image) error {
 				return err
 			}
 			if x != mx-1 {
-				if _, err := fmt.Fprint(w, ", "); err != nil {
+				if _, err := fmt.Fprint(w, ","); err != nil {
 					return err
 				}
 			}

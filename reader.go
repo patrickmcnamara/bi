@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image"
 	"io"
-	"strings"
 )
 
 // Decode reads a BI image from Reader r and returns it as an Image m.
@@ -49,7 +48,7 @@ func decode(r io.Reader) (m image.Image, err error) {
 			return
 		}
 		for x, n := range row {
-			c, ok := colors[strings.TrimSpace(n)]
+			c, ok := colors[n]
 			if !ok {
 				err = image.ErrFormat
 				return

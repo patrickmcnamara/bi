@@ -8,8 +8,8 @@ Nice.
 For example, a valid 2x2 pixel image is:
 ```
 bi
-red, green
-blue, white
+red,green
+blue,white
 ```
 
 ## Examples
