@@ -18,6 +18,8 @@ blue, white
 
 *Before BI encoding.*
 
+---
+
 ![After BI encoding. And re-encoded as PNG obvs.](./misc/lenna2.png)
 
 *After BI encoding. And re-encoded as PNG obvs.*
