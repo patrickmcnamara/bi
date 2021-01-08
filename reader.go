@@ -26,7 +26,7 @@ func DecodeConfig(r io.Reader) (c image.Config, err error) {
 func decodeMagic(r io.Reader) error {
 	hdr := make([]byte, len(Magic))
 	if _, err := r.Read(hdr); err != nil {
-		return image.ErrFormat
+		return fmt.Errorf("bi: error decoding: %s", err)
 	}
 	if string(hdr) != Magic {
 		return fmt.Errorf("bi: expected magic number %q not found", Magic)
@@ -50,7 +50,7 @@ func decode(r io.Reader) (m image.Image, err error) {
 		for x, n := range row {
 			c, ok := colors[n]
 			if !ok {
-				err = image.ErrFormat
+				err = fmt.Errorf("bi: unexpected colour %q on line %d", n, y+2)
 				return
 			}
 			img.SetRGBA(x, y, c)
