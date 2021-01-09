@@ -1,25 +1,46 @@
 package bi
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 	"strings"
+	"sync"
 )
 
 // Model can convert any Color to one from its own color model, and can convert
 // a color to the name of the color, and can convert from a name of a color to
 // the color.
 type Model interface {
+	Name() string
 	color.Model
 	ColorToName(c color.Color) string
 	NameToColor(name string) (c color.Color, ok bool)
 }
 
-// CSSColModLvl4 is the Model for CSS Color Module Level 4.
+var models sync.Map
+
+// RegisterColorModel registers a Model for use by Decode.
+func RegisterColorModel(mod Model) {
+	models.Store(mod.Name(), mod)
+}
+
+// CSSColModLvl4 is a Model for CSS Color Module Level 4.
+//
 // https://www.w3.org/TR/css-color-4/#named-colors
 var CSSColModLvl4 Model = cssColModLvl4{}
 
+// Hex is a model for hex quadruplet color codes in the format #00000000,
+// including alpha.
+//
+// https://css-tricks.com/8-digit-hex-codes/
+var Hex Model = hex{}
+
 type cssColModLvl4 struct{}
+
+func (mod cssColModLvl4) Name() string {
+	return "cssColModLvl4"
+}
 
 func (mod cssColModLvl4) Convert(c color.Color) color.Color {
 	nc, _ := nearestColor(c)
@@ -216,4 +237,37 @@ func diff(a, b uint32) uint32 {
 		return b - a
 	}
 	return a - b
+}
+
+type hex struct{}
+
+func (mod hex) Name() string {
+	return "hex"
+}
+
+func (mod hex) Convert(c color.Color) color.Color {
+	return c
+}
+
+func (mod hex) ColorToName(c color.Color) string {
+	r, g, b, a := c.RGBA()
+	return fmt.Sprintf("#%02X%02X%02X%02X", uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8))
+}
+
+func (mod hex) NameToColor(name string) (c color.Color, ok bool) {
+	if len(name) != 9 {
+		return
+	}
+	crgba := color.RGBA{}
+	if _, err := fmt.Sscanf(name, "#%02X%02X%02X%02X", &crgba.R, &crgba.G, &crgba.B, &crgba.A); err != nil {
+		return
+	}
+	c = crgba
+	ok = true
+	return
+}
+
+func init() {
+	RegisterColorModel(CSSColModLvl4)
+	RegisterColorModel(Hex)
 }

@@ -6,17 +6,18 @@ import (
 	"io"
 )
 
-// Encode encodes the Image m to the Writer w in BI format. As BI only supports
-// 148 colors, this process is very lossy.
-func Encode(w io.Writer, m image.Image) error {
-	if _, err := w.Write([]byte("bi\n")); err != nil {
+// Encode encodes the Image m to the Writer w in BI format using the Model mod.
+// This is usually a very lossy process.
+func Encode(w io.Writer, m image.Image, mod Model) error {
+	hdr := MagicNumber + "," + mod.Name() + "\n"
+	if _, err := w.Write([]byte(hdr)); err != nil {
 		return err
 	}
 	mp := m.Bounds().Max
 	mx, my := mp.X, mp.Y
 	for y := 0; y < my; y++ {
 		for x := 0; x < mx; x++ {
-			n := CSSColModLvl4.ColorToName(m.At(x, y))
+			n := mod.ColorToName(m.At(x, y))
 			if _, err := fmt.Fprint(w, n); err != nil {
 				return err
 			}
