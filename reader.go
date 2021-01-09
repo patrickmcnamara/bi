@@ -6,47 +6,66 @@ import (
 	"fmt"
 	"image"
 	"io"
+	"strings"
 )
 
 // Decode reads a BI image from Reader r and returns it as an Image m.
 func Decode(r io.Reader) (m image.Image, err error) {
-	hdrr, err := headerReader(r)
+	hdrr, mod, err := headerReader(r)
 	if err != nil {
 		return
 	}
-	return decode(hdrr)
+	return decode(hdrr, mod)
 }
 
 // DecodeConfig decodes the Model and dimensions of a BI image from Reader r.
 func DecodeConfig(r io.Reader) (c image.Config, err error) {
-	hdrr, err := headerReader(r)
+	hdrr, mod, err := headerReader(r)
 	if err != nil {
 		return
 	}
-	return decodeConfig(hdrr)
+	return decodeConfig(hdrr, mod)
 }
 
-func headerReader(r1 io.Reader) (r2 io.Reader, err error) {
+func headerReader(r1 io.Reader) (r2 io.Reader, mod Model, err error) {
 	bufr := bufio.NewReaderSize(r1, 128)
-	if err = decodeHeader(bufr); err != nil {
+	mod, err = decodeHeader(bufr)
+	if err != nil {
 		return
 	}
 	r2 = bufr
 	return
 }
 
-func decodeHeader(r *bufio.Reader) error {
+func decodeHeader(r *bufio.Reader) (mod Model, err error) {
 	hdr, err := r.ReadBytes('\n')
 	if err != nil {
-		return fmt.Errorf("bi: error decoding: %w", err)
+		err = fmt.Errorf("bi: error decoding: %w", err)
+		return
 	}
-	if string(hdr) != MagicNumber {
-		return fmt.Errorf("bi: expected magic number %q not found", MagicNumber)
+	tkns := strings.Split(strings.TrimSuffix(string(hdr), "\n"), ",")
+	if len(tkns) < 1 || tkns[0] != MagicNumber {
+		err = fmt.Errorf("bi: expected magic number %q not found", MagicNumber)
+		return
 	}
-	return nil
+	if len(tkns) < 2 || tkns[1] == "" {
+		err = fmt.Errorf("bi: expected color model name not found")
+		return
+	}
+	if len(tkns) > 2 {
+		err = fmt.Errorf("bi: invalid header, too many tokens")
+		return
+	}
+	switch tkns[1] {
+	case "cssColModLvl4":
+		mod = CSSColModLvl4
+	default:
+		err = fmt.Errorf("bi: color model %q is invalid", tkns[1])
+	}
+	return
 }
 
-func decode(r io.Reader) (m image.Image, err error) {
+func decode(r io.Reader, mod Model) (m image.Image, err error) {
 	cs, err := csv.NewReader(r).ReadAll()
 	if err != nil {
 		return
@@ -60,7 +79,7 @@ func decode(r io.Reader) (m image.Image, err error) {
 			return
 		}
 		for x, n := range row {
-			c, ok := CSSColModLvl4.NameToColor(n)
+			c, ok := mod.NameToColor(n)
 			if !ok {
 				err = fmt.Errorf("bi: unexpected colour %q on line %d", n, y+2)
 				return
@@ -72,14 +91,14 @@ func decode(r io.Reader) (m image.Image, err error) {
 	return
 }
 
-func decodeConfig(r io.Reader) (cfg image.Config, err error) {
+func decodeConfig(r io.Reader, mod Model) (cfg image.Config, err error) {
 	cs, err := csv.NewReader(r).ReadAll()
 	if err != nil {
 		return
 	}
 	cfg.Width = len(cs[0])
 	cfg.Height = len(cs)
-	cfg.ColorModel = CSSColModLvl4
+	cfg.ColorModel = mod
 	return
 }
 
