@@ -1,6 +1,7 @@
 package bi
 
 import (
+	"bufio"
 	"encoding/csv"
 	"fmt"
 	"image"
@@ -9,27 +10,38 @@ import (
 
 // Decode reads a BI image from Reader r and returns it as an Image m.
 func Decode(r io.Reader) (m image.Image, err error) {
-	if err = decodeMagic(r); err != nil {
+	hdrr, err := headerReader(r)
+	if err != nil {
 		return
 	}
-	return decode(r)
+	return decode(hdrr)
 }
 
 // DecodeConfig decodes the Model and dimensions of a BI image from Reader r.
 func DecodeConfig(r io.Reader) (c image.Config, err error) {
-	if err = decodeMagic(r); err != nil {
+	hdrr, err := headerReader(r)
+	if err != nil {
 		return
 	}
-	return decodeConfig(r)
+	return decodeConfig(hdrr)
 }
 
-func decodeMagic(r io.Reader) error {
-	hdr := make([]byte, len(Magic))
-	if _, err := r.Read(hdr); err != nil {
+func headerReader(r1 io.Reader) (r2 io.Reader, err error) {
+	bufr := bufio.NewReaderSize(r1, 128)
+	if err = decodeHeader(bufr); err != nil {
+		return
+	}
+	r2 = bufr
+	return
+}
+
+func decodeHeader(r *bufio.Reader) error {
+	hdr, err := r.ReadBytes('\n')
+	if err != nil {
 		return fmt.Errorf("bi: error decoding: %w", err)
 	}
-	if string(hdr) != Magic {
-		return fmt.Errorf("bi: expected magic number %q not found", Magic)
+	if string(hdr) != MagicNumber {
+		return fmt.Errorf("bi: expected magic number %q not found", MagicNumber)
 	}
 	return nil
 }
@@ -72,5 +84,5 @@ func decodeConfig(r io.Reader) (cfg image.Config, err error) {
 }
 
 func init() {
-	image.RegisterFormat("bi", "bi\n", Decode, DecodeConfig)
+	image.RegisterFormat("bi", MagicNumber, Decode, DecodeConfig)
 }
