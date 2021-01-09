@@ -48,12 +48,12 @@ func decode(r io.Reader) (m image.Image, err error) {
 			return
 		}
 		for x, n := range row {
-			c, ok := colors[n]
+			c, ok := CSSColModLvl4.NameToColor(n)
 			if !ok {
 				err = fmt.Errorf("bi: unexpected colour %q on line %d", n, y+2)
 				return
 			}
-			img.SetRGBA(x, y, c)
+			img.Set(x, y, c)
 		}
 	}
 	m = img
@@ -67,7 +67,7 @@ func decodeConfig(r io.Reader) (cfg image.Config, err error) {
 	}
 	cfg.Width = len(cs[0])
 	cfg.Height = len(cs)
-	cfg.ColorModel = CSSColModLevel4
+	cfg.ColorModel = CSSColModLvl4
 	return
 }
 

@@ -6,13 +6,37 @@ import (
 	"strings"
 )
 
-// CSSColModLevel4 is the Model for CSS Color Module Level 4.
-var CSSColModLevel4 color.Model = color.ModelFunc(func(c color.Color) color.Color {
+// Model can convert any Color to one from its own color model, and can convert
+// a color to the name of the color, and can convert from a name of a color to
+// the color.
+type Model interface {
+	color.Model
+	ColorToName(c color.Color) string
+	NameToColor(name string) (c color.Color, ok bool)
+}
+
+// CSSColModLvl4 is the Model for CSS Color Module Level 4.
+// https://www.w3.org/TR/css-color-4/#named-colors
+var CSSColModLvl4 Model = cssColModLvl4{}
+
+type cssColModLvl4 struct{}
+
+func (mod cssColModLvl4) Convert(c color.Color) color.Color {
 	nc, _ := nearestColor(c)
 	return nc
-})
+}
 
-var colors = map[string]color.RGBA{
+func (mod cssColModLvl4) ColorToName(c color.Color) string {
+	_, n := nearestColor(c)
+	return n
+}
+
+func (mod cssColModLvl4) NameToColor(name string) (c color.Color, ok bool) {
+	c, ok = cssColModLvl4Colors[name]
+	return
+}
+
+var cssColModLvl4Colors = map[string]color.RGBA{
 	"":                     {}, // transparent
 	"aliceblue":            {240, 248, 255, 255},
 	"antiquewhite":         {250, 235, 215, 255},
@@ -166,7 +190,7 @@ var colors = map[string]color.RGBA{
 
 func nearestColor(c color.Color) (nc color.Color, name string) {
 	var mind uint32 = math.MaxUint32
-	for n, cc := range colors {
+	for n, cc := range cssColModLvl4Colors {
 		d := colorDissimilarity(c, cc)
 		if d < mind || d == mind && strings.Compare(n, name) < 0 {
 			mind = d
