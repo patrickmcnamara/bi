@@ -56,12 +56,11 @@ func decodeHeader(r *bufio.Reader) (mod Model, err error) {
 		err = fmt.Errorf("bi: invalid header, too many tokens")
 		return
 	}
-	switch tkns[1] {
-	case "cssColModLvl4":
-		mod = CSSColModLvl4
-	default:
+	val, ok := models.Load(tkns[1])
+	if !ok {
 		err = fmt.Errorf("bi: color model %q is invalid", tkns[1])
 	}
+	mod, _ = val.(Model)
 	return
 }
 
