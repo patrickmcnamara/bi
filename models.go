@@ -30,7 +30,7 @@ func RegisterColorModel(mod Model) {
 // https://www.w3.org/TR/css-color-4/#named-colors
 var CSSColModLvl4 Model = cssColModLvl4{}
 
-// Hex is a model for hex quadruplet color codes in the format #00000000,
+// Hex is a Model for hex quadruplet color codes in the format #00000000,
 // including alpha.
 //
 // https://css-tricks.com/8-digit-hex-codes/
