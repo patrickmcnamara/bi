@@ -26,7 +26,7 @@ func DecodeConfig(r io.Reader) (c image.Config, err error) {
 func decodeMagic(r io.Reader) error {
 	hdr := make([]byte, len(Magic))
 	if _, err := r.Read(hdr); err != nil {
-		return fmt.Errorf("bi: error decoding: %s", err)
+		return fmt.Errorf("bi: error decoding: %w", err)
 	}
 	if string(hdr) != Magic {
 		return fmt.Errorf("bi: expected magic number %q not found", Magic)
