@@ -16,7 +16,7 @@ func Encode(w io.Writer, m image.Image) error {
 	mx, my := mp.X, mp.Y
 	for y := 0; y < my; y++ {
 		for x := 0; x < mx; x++ {
-			_, n := nearestColor(m.At(x, y))
+			n := CSSColModLvl4.ColorToName(m.At(x, y))
 			if _, err := fmt.Fprint(w, n); err != nil {
 				return err
 			}

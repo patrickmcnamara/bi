@@ -1,8 +1,8 @@
 package bi
 
 const (
-	// BI is the extension for BI image files.
-	BI = ".bi"
-	// Magic is the magic number at the start of BI files.
-	Magic = "bi\n"
+	// Extension is the extension for Extension image files.
+	Extension = ".bi"
+	// MagicNumber is the magic number at the start of BI files.
+	MagicNumber = "bi"
 )
