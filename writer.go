@@ -9,7 +9,7 @@ import (
 // Encode encodes the Image m to the Writer w in BI format using the Model mod.
 // This is usually a very lossy process.
 func Encode(w io.Writer, m image.Image, mod Model) error {
-	hdr := MagicNumber + "," + mod.Name() + "\n"
+	hdr := MagicNumber + "," + mod.ID() + "\n"
 	if _, err := w.Write([]byte(hdr)); err != nil {
 		return err
 	}
