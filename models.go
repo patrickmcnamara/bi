@@ -20,8 +20,8 @@ type Model interface {
 
 var models sync.Map
 
-// RegisterColorModel registers a Model for use by Decode.
-func RegisterColorModel(mod Model) {
+// RegisterModel registers a Model for use by Decode.
+func RegisterModel(mod Model) {
 	models.Store(mod.ID(), mod)
 }
 
@@ -268,6 +268,6 @@ func (mod hex) NameToColor(name string) (c color.Color, ok bool) {
 }
 
 func init() {
-	RegisterColorModel(Standard)
-	RegisterColorModel(Hex)
+	RegisterModel(Standard)
+	RegisterModel(Hex)
 }
